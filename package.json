@@ -9,6 +9,7 @@
     "test": "node server/scripts/test-api.js",
     "test:api": "node server/scripts/test-api.js",
     "verify": "node scripts/verify-fullstack.js",
+    "postinstall": "npm install --prefix client",
     "build": "npm run build --prefix client",
     "client": "npm run dev --prefix client",
     "server": "node server/server.js"
