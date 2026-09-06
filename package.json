@@ -1,0 +1,25 @@
+{
+  "name": "store-rating-management-system",
+  "version": "1.0.0",
+  "description": "Store Rating Management System with Express.js, PostgreSQL, and React.js",
+  "scripts": {
+    "start": "node server/server.js",
+    "dev": "node server/server.js",
+    "seed": "node server/scripts/seed.js",
+    "test": "node server/scripts/test-api.js",
+    "test:api": "node server/scripts/test-api.js",
+    "verify": "node scripts/verify-fullstack.js",
+    "build": "npm run build --prefix client",
+    "client": "npm run dev --prefix client",
+    "server": "node server/server.js"
+  },
+  "keywords": [
+    "store-rating",
+    "express",
+    "postgresql",
+    "react",
+    "role-based-access"
+  ],
+  "author": "",
+  "license": "ISC"
+}
