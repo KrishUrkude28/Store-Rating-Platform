@@ -15,7 +15,11 @@ async function getClient() {
   if (databaseUrl) {
     try {
       const { Pool } = require('pg');
-      const pool = new Pool({ connectionString: databaseUrl });
+      const poolConfig = { connectionString: databaseUrl };
+      if (!databaseUrl.includes('localhost') && !databaseUrl.includes('127.0.0.1')) {
+        poolConfig.ssl = { rejectUnauthorized: false };
+      }
+      const pool = new Pool(poolConfig);
       // Test connection
       await pool.query('SELECT 1');
       console.log('Connected to PostgreSQL via DATABASE_URL');
