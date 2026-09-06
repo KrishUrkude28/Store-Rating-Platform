@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { api } from '../../services/api';
 import { UserPlus, ArrowLeft, AlertCircle, CheckCircle2, Check, X } from 'lucide-react';
 
+import Sidebar from '../../components/Sidebar';
+import TopBar from '../../components/TopBar';
+
 export default function AdminAddUserPage({ onNavigate }) {
   const [formData, setFormData] = useState({
     name: '',
@@ -15,6 +18,12 @@ export default function AdminAddUserPage({ onNavigate }) {
   const [serverError, setServerError] = useState(null);
   const [successMsg, setSuccessMsg] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  const handleTabChange = (tabId) => {
+    if (tabId === 'dashboard') onNavigate('/admin/dashboard');
+    if (tabId === 'stores') onNavigate('/admin/stores');
+    if (tabId === 'users') onNavigate('/admin/users');
+  };
 
   const nameLen = formData.name.trim().length;
   const isNameValid = nameLen >= 20 && nameLen <= 60;
@@ -82,19 +91,23 @@ export default function AdminAddUserPage({ onNavigate }) {
   };
 
   return (
-    <div className="main-content" id="admin-add-user-page">
-      <div style={{ marginBottom: '1.5rem' }}>
-        <button
-          className="btn btn-secondary btn-sm"
-          onClick={() => onNavigate('/admin/users')}
-          id="btn-back-from-add-user"
-        >
-          <ArrowLeft size={15} />
-          <span>Back to Users</span>
-        </button>
-      </div>
+    <div className="app-layout">
+      <Sidebar currentTab="users" onTabChange={handleTabChange} />
+      <div className="main-content-wrapper">
+        <TopBar />
+        <div className="page-container" id="admin-add-user-page">
+          <div style={{ marginBottom: '1.25rem' }}>
+            <button
+              className="admin-filter-btn-reset"
+              onClick={() => onNavigate('/admin/users')}
+              id="btn-back-from-add-user"
+            >
+              <ArrowLeft size={15} />
+              <span>Back to Users</span>
+            </button>
+          </div>
 
-      <div className="glass-card" style={{ maxWidth: '640px', margin: '0 auto' }}>
+          <div className="admin-card" style={{ maxWidth: '640px', margin: '0 auto', padding: '32px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '1rem' }}>
           <div className="stat-icon-wrapper stat-icon-users" style={{ width: '44px', height: '44px' }}>
             <UserPlus size={22} />
@@ -234,6 +247,8 @@ export default function AdminAddUserPage({ onNavigate }) {
             </button>
           </div>
         </form>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../../services/api';
 import { PlusCircle, ArrowLeft, AlertCircle, CheckCircle2 } from 'lucide-react';
 
+import Sidebar from '../../components/Sidebar';
+import TopBar from '../../components/TopBar';
+
 export default function AdminAddStorePage({ onNavigate }) {
   const [formData, setFormData] = useState({
     name: '',
@@ -16,6 +19,12 @@ export default function AdminAddStorePage({ onNavigate }) {
   const [serverError, setServerError] = useState(null);
   const [successMsg, setSuccessMsg] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+
+  const handleTabChange = (tabId) => {
+    if (tabId === 'dashboard') onNavigate('/admin/dashboard');
+    if (tabId === 'stores') onNavigate('/admin/stores');
+    if (tabId === 'users') onNavigate('/admin/users');
+  };
 
   useEffect(() => {
     async function loadOwners() {
@@ -90,19 +99,23 @@ export default function AdminAddStorePage({ onNavigate }) {
   };
 
   return (
-    <div className="main-content" id="admin-add-store-page">
-      <div style={{ marginBottom: '1.5rem' }}>
-        <button
-          className="btn btn-secondary btn-sm"
-          onClick={() => onNavigate('/admin/stores')}
-          id="btn-back-from-add-store"
-        >
-          <ArrowLeft size={15} />
-          <span>Back to Stores</span>
-        </button>
-      </div>
+    <div className="app-layout">
+      <Sidebar currentTab="stores" onTabChange={handleTabChange} />
+      <div className="main-content-wrapper">
+        <TopBar />
+        <div className="page-container" id="admin-add-store-page">
+          <div style={{ marginBottom: '1.25rem' }}>
+            <button
+              className="admin-filter-btn-reset"
+              onClick={() => onNavigate('/admin/stores')}
+              id="btn-back-from-add-store"
+            >
+              <ArrowLeft size={15} />
+              <span>Back to Stores</span>
+            </button>
+          </div>
 
-      <div className="glass-card" style={{ maxWidth: '640px', margin: '0 auto' }}>
+          <div className="admin-card" style={{ maxWidth: '640px', margin: '0 auto', padding: '32px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '1rem' }}>
           <div className="stat-icon-wrapper stat-icon-stores" style={{ width: '44px', height: '44px' }}>
             <PlusCircle size={22} />
@@ -221,6 +234,8 @@ export default function AdminAddStorePage({ onNavigate }) {
             </button>
           </div>
         </form>
+          </div>
+        </div>
       </div>
     </div>
   );

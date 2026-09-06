@@ -1,7 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../../services/api';
 import StarRating from '../../components/StarRating';
-import { ArrowLeft, User, Mail, MapPin, Shield, Store, Star, AlertCircle } from 'lucide-react';
+import { 
+  ArrowLeft, 
+  User, 
+  Mail, 
+  MapPin, 
+  Shield, 
+  Store, 
+  Star, 
+  AlertCircle,
+  UserCheck,
+  Calendar,
+  Hash,
+  Award
+} from 'lucide-react';
+
+import Sidebar from '../../components/Sidebar';
+import TopBar from '../../components/TopBar';
 
 export default function AdminUserDetailsPage({ userId, onNavigate }) {
   const [userData, setUserData] = useState(null);
@@ -26,134 +42,273 @@ export default function AdminUserDetailsPage({ userId, onNavigate }) {
     }
   }, [userId]);
 
-  if (loading) {
+  const handleTabChange = (tabId) => {
+    if (tabId === 'dashboard') onNavigate('/admin/dashboard');
+    if (tabId === 'stores') onNavigate('/admin/stores');
+    if (tabId === 'users') onNavigate('/admin/users');
+  };
+
+  // Helper for avatar initials
+  const getInitials = (name) => {
+    return (name || 'User')
+      .split(' ')
+      .map(w => w[0])
+      .join('')
+      .slice(0, 2)
+      .toUpperCase();
+  };
+
+  const renderRoleBadge = (role) => {
+    if (role === 'ADMIN') {
+      return (
+        <span className="role-badge role-badge-admin" style={{ fontSize: '0.82rem', padding: '5px 12px' }}>
+          <Shield size={13} />
+          <span>Administrator</span>
+        </span>
+      );
+    }
+    if (role === 'STORE_OWNER') {
+      return (
+        <span className="role-badge role-badge-owner" style={{ fontSize: '0.82rem', padding: '5px 12px' }}>
+          <Store size={13} />
+          <span>Store Owner</span>
+        </span>
+      );
+    }
     return (
-      <div className="main-content">
-        <div className="loading-spinner">
-          <div className="spinner"></div>
-          <p>Retrieving user profile information...</p>
-        </div>
-      </div>
+      <span className="role-badge role-badge-user" style={{ fontSize: '0.82rem', padding: '5px 12px' }}>
+        <UserCheck size={13} />
+        <span>Platform User</span>
+      </span>
     );
-  }
-
-  if (error || !userData) {
-    return (
-      <div className="main-content">
-        <div className="alert alert-danger">
-          <AlertCircle size={18} />
-          <span>{error || 'User not found.'}</span>
-        </div>
-        <button className="btn btn-secondary" onClick={() => onNavigate('/admin/users')}>
-          <ArrowLeft size={16} />
-          <span>Back to Users List</span>
-        </button>
-      </div>
-    );
-  }
-
-  const { user, stores } = userData;
-
-  const roleClassMap = {
-    ADMIN: 'role-admin',
-    USER: 'role-user',
-    STORE_OWNER: 'role-owner'
   };
 
   return (
-    <div className="main-content" id="admin-user-details-page">
-      <div style={{ marginBottom: '1.5rem' }}>
-        <button
-          className="btn btn-secondary btn-sm"
-          onClick={() => onNavigate('/admin/users')}
-          id="btn-back-to-users"
-        >
-          <ArrowLeft size={15} />
-          <span>Back to Users</span>
-        </button>
-      </div>
-
-      <div className="glass-card" style={{ maxWidth: '750px', margin: '0 auto' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '1.25rem', marginBottom: '1.75rem' }}>
-          <div>
-            <h1>{user.name}</h1>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem' }}>User ID: {user.id}</p>
+    <div className="app-layout">
+      <Sidebar currentTab="users" onTabChange={handleTabChange} />
+      <div className="main-content-wrapper">
+        <TopBar />
+        <div className="page-container" id="admin-user-details-page">
+          
+          {/* Back Navigation */}
+          <div style={{ marginBottom: '1.25rem' }}>
+            <button
+              onClick={() => onNavigate('/admin/users')}
+              id="btn-back-to-users"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                color: '#475569',
+                backgroundColor: '#ffffff',
+                border: '1px solid #e2e8f0',
+                padding: '8px 16px',
+                borderRadius: '8px',
+                fontSize: '0.88rem',
+                fontWeight: 600,
+                boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
+                transition: 'all 0.15s ease'
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.color = '#0f172a';
+                e.currentTarget.style.backgroundColor = '#f8fafc';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.color = '#475569';
+                e.currentTarget.style.backgroundColor = '#ffffff';
+              }}
+            >
+              <ArrowLeft size={16} />
+              <span>Back to User Directory</span>
+            </button>
           </div>
-          <span className={`user-role-tag ${roleClassMap[user.role] || ''}`} style={{ fontSize: '0.85rem', padding: '0.35rem 0.85rem' }}>
-            {user.role}
-          </span>
-        </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
-          <div style={{ display: 'flex', gap: '0.85rem' }}>
-            <div className="stat-icon-wrapper stat-icon-users" style={{ width: '42px', height: '42px' }}>
-              <Mail size={18} />
+          {loading ? (
+            <div className="admin-card" style={{ padding: '70px 20px', textAlign: 'center' }}>
+              <div className="loading-spinner">
+                <div className="spinner"></div>
+                <p style={{ marginTop: '12px', color: '#64748b' }}>Retrieving user profile information...</p>
+              </div>
             </div>
-            <div>
-              <span className="stat-label" style={{ fontSize: '0.78rem' }}>Email Address</span>
-              <p style={{ color: '#ffffff', fontWeight: 600 }}>{user.email}</p>
+          ) : error || !userData ? (
+            <div className="admin-card" style={{ padding: '40px 24px', textAlign: 'center' }}>
+              <div className="alert alert-danger" style={{ maxWidth: '480px', margin: '0 auto 1.5rem' }}>
+                <AlertCircle size={18} />
+                <span>{error || 'User profile not found.'}</span>
+              </div>
+              <button
+                className="admin-filter-btn-reset"
+                style={{ margin: '0 auto', backgroundColor: '#2563eb', color: '#ffffff', borderColor: '#2563eb' }}
+                onClick={() => onNavigate('/admin/users')}
+              >
+                Back to Users List
+              </button>
             </div>
-          </div>
-
-          <div style={{ display: 'flex', gap: '0.85rem' }}>
-            <div className="stat-icon-wrapper stat-icon-users" style={{ width: '42px', height: '42px' }}>
-              <MapPin size={18} />
-            </div>
-            <div>
-              <span className="stat-label" style={{ fontSize: '0.78rem' }}>Physical Address</span>
-              <p style={{ color: '#ffffff' }}>{user.address}</p>
-            </div>
-          </div>
-        </div>
-
-        {/* PRD ADMIN-006: If role is Store Owner, display store and rating information */}
-        {user.role === 'STORE_OWNER' && (
-          <div style={{ marginTop: '2rem', borderTop: '1px solid var(--border-subtle)', paddingTop: '1.5rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1rem' }}>
-              <Store size={20} color="#38bdf8" />
-              <h3>Associated Stores & Rating</h3>
-            </div>
-
-            {stores && stores.length > 0 ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                {stores.map((store) => (
-                  <div
-                    key={store.id}
-                    style={{
-                      background: 'rgba(255, 255, 255, 0.03)',
-                      border: '1px solid var(--border-subtle)',
-                      borderRadius: 'var(--radius-md)',
-                      padding: '1.25rem',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      flexWrap: 'wrap',
-                      gap: '1rem'
-                    }}
-                    id={`owner-store-${store.id}`}
-                  >
-                    <div>
-                      <h4 style={{ fontSize: '1.1rem', marginBottom: '0.25rem' }}>{store.name}</h4>
-                      <p style={{ fontSize: '0.85rem' }}>{store.address}</p>
+          ) : (
+            <>
+              {/* Profile Card Banner matching RateStore theme */}
+              <div className="user-profile-header-card">
+                <div className="user-profile-banner">
+                  <div style={{ position: 'absolute', right: '24px', bottom: '16px', color: 'rgba(255,255,255,0.4)', fontSize: '0.85rem' }}>
+                    RateStore Verified Account
+                  </div>
+                </div>
+                <div className="user-profile-body">
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'flex-end', gap: '20px', flexWrap: 'wrap' }}>
+                      <div className="user-avatar-large">
+                        {getInitials(userData.user.name)}
+                      </div>
+                      <div style={{ paddingBottom: '4px' }}>
+                        <h1 style={{ fontSize: '1.65rem', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.02em', marginBottom: '4px' }}>
+                          {userData.user.name}
+                        </h1>
+                        <p style={{ color: '#64748b', fontSize: '0.9rem' }}>
+                          {userData.user.email}
+                        </p>
+                      </div>
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.25rem' }}>
-                      <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Average Rating</span>
-                      <StarRating
-                        value={store.rating || store.average_rating}
-                        readOnly={true}
-                        showLabel={true}
-                      />
+                    <div style={{ marginTop: '16px' }}>
+                      {renderRoleBadge(userData.user.role)}
                     </div>
                   </div>
-                ))}
+
+                  {/* Profile Details Grid */}
+                  <div className="user-details-grid">
+                    <div className="user-detail-tile">
+                      <div className="user-detail-tile-icon" style={{ color: '#2563eb' }}>
+                        <Mail size={18} />
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '0.78rem', fontWeight: 600, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                          Email Address
+                        </div>
+                        <div style={{ fontSize: '0.92rem', fontWeight: 600, color: '#0f172a', marginTop: '2px' }}>
+                          {userData.user.email}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="user-detail-tile">
+                      <div className="user-detail-tile-icon" style={{ color: '#10b981' }}>
+                        <MapPin size={18} />
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '0.78rem', fontWeight: 600, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                          Physical Address
+                        </div>
+                        <div style={{ fontSize: '0.92rem', color: '#0f172a', marginTop: '2px', lineHeight: '1.4' }}>
+                          {userData.user.address}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="user-detail-tile">
+                      <div className="user-detail-tile-icon" style={{ color: '#8b5cf6' }}>
+                        <Hash size={18} />
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '0.78rem', fontWeight: 600, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                          User Identifier
+                        </div>
+                        <div style={{ fontSize: '0.92rem', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>
+                          ID #{userData.user.id}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="user-detail-tile">
+                      <div className="user-detail-tile-icon" style={{ color: '#f59e0b' }}>
+                        <Shield size={18} />
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '0.78rem', fontWeight: 600, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                          Account Privilege
+                        </div>
+                        <div style={{ fontSize: '0.92rem', fontWeight: 600, color: '#0f172a', marginTop: '2px' }}>
+                          {userData.user.role === 'ADMIN' ? 'Full System Administrator' : userData.user.role === 'STORE_OWNER' ? 'Store & Ratings Manager' : 'Standard Customer'}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-            ) : (
-              <p style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>
-                No stores currently registered under this owner account.
-              </p>
-            )}
-          </div>
-        )}
+
+              {/* PRD ADMIN-006: Associated Stores if Role is STORE_OWNER */}
+              {userData.user.role === 'STORE_OWNER' && (
+                <div className="admin-card" style={{ padding: '24px 28px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+                    <div style={{ width: '36px', height: '36px', borderRadius: '8px', backgroundColor: '#ecfdf5', color: '#059669', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Store size={20} />
+                    </div>
+                    <div>
+                      <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#0f172a' }}>
+                        Associated Stores & Performance
+                      </h3>
+                      <p style={{ fontSize: '0.85rem', color: '#64748b' }}>
+                        Stores managed by this owner account
+                      </p>
+                    </div>
+                  </div>
+
+                  {userData.stores && userData.stores.length > 0 ? (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '16px' }}>
+                      {userData.stores.map((store) => (
+                        <div
+                          key={store.id}
+                          style={{
+                            background: '#f8fafc',
+                            border: '1px solid #e2e8f0',
+                            borderRadius: '12px',
+                            padding: '18px 20px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'space-between',
+                            gap: '12px',
+                            transition: 'transform 0.15s ease, box-shadow 0.15s ease'
+                          }}
+                        >
+                          <div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
+                              <h4 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#0f172a' }}>
+                                {store.name}
+                              </h4>
+                              <span className="category-pill">
+                                {store.category || 'Retail Store'}
+                              </span>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '6px', marginTop: '6px', color: '#64748b' }}>
+                              <MapPin size={14} style={{ marginTop: '2px', flexShrink: 0 }} />
+                              <span style={{ fontSize: '0.84rem' }}>{store.address}</span>
+                            </div>
+                          </div>
+
+                          <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 500 }}>
+                              Average Rating
+                            </span>
+                            <StarRating
+                              value={store.rating || store.average_rating}
+                              readOnly={true}
+                              showLabel={true}
+                              size={16}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div style={{ padding: '32px 20px', textAlign: 'center', backgroundColor: '#f8fafc', borderRadius: '10px', border: '1px dashed #cbd5e1' }}>
+                      <p style={{ color: '#64748b', fontSize: '0.9rem' }}>
+                        No stores currently assigned to this store owner.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </>
+          )}
+        </div>
       </div>
     </div>
   );
